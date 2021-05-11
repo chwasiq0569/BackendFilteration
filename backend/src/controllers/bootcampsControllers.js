@@ -2,7 +2,20 @@ const asyncHandler = require("../middlewares/asyncHandler")
 const Bootcamp = require("../models/bootcamp")
 
 exports.getAllBootcamps = async (req, res, next) => {
-    const bootcamps = await Bootcamp.find()
+
+    const reqQuery = { ...req.query }
+
+    const removeFields = ["sort"]
+    
+    removeFields.forEach(val => delete reqQuery[val])
+
+
+    let queryStr = JSON.stringify(reqQuery)
+
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`)
+    
+    const bootcamps = await Bootcamp.find(JSON.parse(queryStr))
+
     return res.status(200).json({
         success: true,
         data: bootcamps
